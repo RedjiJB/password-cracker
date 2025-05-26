@@ -1,0 +1,76 @@
+[run]
+# Coverage.py configuration
+
+# Source packages
+source = .
+
+# Omit files from coverage
+omit =
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */venv/*
+    */env/*
+    */.env/*
+    */migrations/*
+    */config.py
+    setup.py
+    */scripts/*
+
+# Use branch coverage
+branch = True
+
+# Parallel execution support
+parallel = True
+
+[report]
+# Reporting options
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+    
+    # Don't complain about missing debug code:
+    def __repr__
+    def __str__
+    
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+    
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    
+    # Don't complain about abstract methods
+    @abstractmethod
+    @abc.abstractmethod
+    
+    # Ignore type checking imports
+    from typing import
+
+# Ignore missing files
+ignore_errors = True
+
+# Precision
+precision = 2
+
+# Show missing lines
+show_missing = True
+
+# Skip covered files in report
+skip_covered = False
+
+# Sort report by coverage percentage
+sort = Cover
+
+[html]
+# HTML report directory
+directory = htmlcov
+
+# HTML report title
+title = Password Cracker Coverage Report
+
+[xml]
+# XML report output
+output = coverage.xml
