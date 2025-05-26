@@ -407,8 +407,8 @@
     </style>
 </head>
 <body>
-    <!-- Add loading indicator -->
-    <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 30, 0.9); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+    <!-- Fix loading indicator -->
+    <div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 30, 0.9); z-index: 1000; display: none; justify-content: center; align-items: center;">
         <div style="color: #4ecdc4; font-size: 24px;">Loading...</div>
     </div>
 
@@ -532,6 +532,13 @@
     </div>
 
     <script>
+        // Add page load handler
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading indicator on page load
+            const loading = document.getElementById('loading');
+            loading.style.display = 'none';
+        });
+
         // Debounce function for performance
         function debounce(func, wait) {
             let timeout;
@@ -574,6 +581,7 @@
                 // Input validation
                 if (!input) {
                     alert('Please enter a password or hash');
+                    loading.style.display = 'none';
                     return;
                 }
 
@@ -581,12 +589,14 @@
                 const sanitizedInput = input.replace(/[<>]/g, '');
                 if (sanitizedInput !== input) {
                     alert('Invalid characters detected. Please remove < and > characters.');
+                    loading.style.display = 'none';
                     return;
                 }
 
                 // Length validation
                 if (mode === 'analyze' && input.length > 128) {
                     alert('Password is too long. Maximum length is 128 characters.');
+                    loading.style.display = 'none';
                     return;
                 }
 
@@ -599,6 +609,7 @@
                     };
                     if (!hashRegex[hashType].test(input)) {
                         alert(`Invalid ${hashType.toUpperCase()} hash format`);
+                        loading.style.display = 'none';
                         return;
                     }
                 }
