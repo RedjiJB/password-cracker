@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+    <title>Password Cracker Project - Ethical Security Research</title>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <style>
+        /* Critical CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #0f0f1e;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Defer non-critical CSS */
+        @media (prefers-reduced-motion: no-preference) {
+            .matrix-bg {
+                animation: matrix-move 20s linear infinite;
+            }
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(0deg, transparent 48%, rgba(0, 255, 0, 0.02) 50%, transparent 52%),
+                linear-gradient(90deg, transparent 48%, rgba(0, 255, 0, 0.02) 50%, transparent 52%);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        @keyframes matrix-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(25px, 25px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        .warning-banner {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.05));
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .warning-icon {
+            font-size: 32px;
+            color: #ff6b6b;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: #fff;
+        }
+
+        .tab.active {
+            color: #4ecdc4;
+            border-bottom-color: #4ecdc4;
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .project-structure {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .code-block {
+            background: #1a1a2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filename {
+            color: #4ecdc4;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .copy-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #4ecdc4;
+        }
+
+        pre {
+            padding: 20px;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        .keyword { color: #ff6b6b; }
+        .function { color: #4ecdc4; }
+        .string { color: #f9ca24; }
+        .comment { color: #888; font-style: italic; }
+        .number { color: #f0932b; }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        .feature-desc {
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .demo-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #4ecdc4;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], select, textarea {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4ecdc4, #44a3aa);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
+        }
+
+        .button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        .terminal {
+            background: #0f0f1e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .terminal-line {
+            margin: 4px 0;
+            word-wrap: break-word;
+        }
+
+        .terminal-success { color: #4ecdc4; }
+        .terminal-error { color: #ff6b6b; }
+        .terminal-info { color: #f9ca24; }
+        .terminal-prompt { color: #888; }
+
+        .hash-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .hash-table th, .hash-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hash-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #4ecdc4;
+            font-weight: 600;
+        }
+
+        .hash-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .badge-danger {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a3aa);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            input[type="text"], select {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Add loading indicator -->
+    <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 30, 0.9); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+        <div style="color: #4ecdc4; font-size: 24px;">Loading...</div>
+    </div>
+
+    <div class="matrix-bg"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Password Cracker with Wordlists</h1>
+            <p class="subtitle">Ethical Security Research & Password Analysis</p>
+        </div>
+
+        <div class="warning-banner">
+            <span class="warning-icon">⚠️</span>
+            <div>
+                <strong>LEGAL & ETHICAL USE ONLY</strong><br>
+                This tool is for educational purposes and authorized security testing only. 
+                Only test passwords you own or have explicit written permission to analyze. 
+                Unauthorized password cracking is illegal and unethical.
+            </div>
+        </div>
+
+        <div class="tabs" role="tablist">
+            <button class="tab active" onclick="showTab('overview')" role="tab" aria-selected="true" aria-controls="overview">Overview</button>
+            <button class="tab" onclick="showTab('basic')" role="tab" aria-selected="false" aria-controls="basic">Basic Cracker</button>
+            <button class="tab" onclick="showTab('advanced')" role="tab" aria-selected="false" aria-controls="advanced">Advanced Version</button>
+            <button class="tab" onclick="showTab('analyzer')" role="tab" aria-selected="false" aria-controls="analyzer">Password Analyzer</button>
+            <button class="tab" onclick="showTab('tools')" role="tab" aria-selected="false" aria-controls="tools">Pro Tools</button>
+            <button class="tab" onclick="showTab('demo')" role="tab" aria-selected="false" aria-controls="demo">Live Demo</button>
+            <button class="tab" onclick="showTab('readme')" role="tab" aria-selected="false" aria-controls="readme">Documentation</button>
+        </div>
+
+        <div id="overview" class="content-section active" role="tabpanel" aria-labelledby="overview-tab">
+            <div class="project-structure">
+                <h3 style="margin-bottom: 15px; color: #4ecdc4;">📁 Project Structure</h3>
+                <pre>password-cracker-project/
+├── README.md
+│   ├── src/
+│   │   ├── basic_cracker.py
+│   │   ├── advanced_cracker.py
+│   │   ├── password_analyzer.py
+│   │   └── hash_generator.py
+│   ├── wordlists/
+│   │   ├── common_passwords.txt
+│   │   ├── rockyou_top1000.txt
+│   │   └── custom_wordlist.txt
+│   ├── hashes/
+│   │   ├── sample_hashes.txt
+│   │   └── test_database.json
+│   ├── results/
+│   │   └── cracked_passwords.txt
+│   ├── tools/
+│   │   ├── john_wrapper.py
+│   │   └── hashcat_wrapper.py
+│   ├── docs/
+│   │   ├── LEGAL_NOTICE.md
+│   │   └── methodology.md
+│   └── requirements.txt</pre>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔨</div>
+                    <div class="feature-title">Hash Cracking</div>
+                    <div class="feature-desc">Support for MD5, SHA-1, SHA-256, SHA-512, bcrypt, and more. Dictionary and brute-force attacks.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Password Analysis</div>
+                    <div class="feature-desc">Analyze password strength, patterns, and common vulnerabilities. Generate security reports.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Performance</div>
+                    <div class="feature-desc">Multi-threaded implementation for faster cracking. GPU support through hashcat integration.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛠️</div>
+                    <div class="feature-title">Tool Integration</div>
+                    <div class="feature-desc">Wrappers for John the Ripper and hashcat. Combine with custom Python scripts.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <div class="feature-title">Educational</div>
+                    <div class="feature-desc">Learn about hashing algorithms, salting, and password security best practices.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Ethical Focus</div>
+                    <div class="feature-desc">Built-in safeguards and legal notices. Designed for authorized testing only.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="demo" class="content-section" role="tabpanel" aria-labelledby="demo-tab">
+            <div class="demo-section">
+                <h2 class="demo-title">🎮 Live Demo - Password Security Tester</h2>
+                <p style="margin-bottom: 20px; color: #888;">Test password strength and hash cracking (educational simulation)</p>
+                
+                <div class="input-group">
+                    <select id="demo-mode" aria-label="Select demo mode">
+                        <option value="analyze">Analyze Password</option>
+                        <option value="hash">Generate Hash</option>
+                        <option value="crack">Crack Hash (Demo)</option>
+                    </select>
+                    <input type="text" id="demo-input" placeholder="Enter password or hash" aria-label="Password or hash input">
+                    <select id="hash-type" aria-label="Select hash type">
+                        <option value="md5">MD5</option>
+                        <option value="sha1">SHA-1</option>
+                        <option value="sha256">SHA-256</option>
+                    </select>
+                    <button class="button" onclick="runDemo()" aria-label="Run demo">Run Demo</button>
+                </div>
+                
+                <div id="demo-results" style="margin-top: 30px;" role="region" aria-live="polite"></div>
+                
+                <div class="terminal" id="demo-terminal" style="display: none;" role="log" aria-label="Demo terminal output">
+                    <div class="terminal-line terminal-prompt">$ password_cracker --demo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Debounce function for performance
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Optimize tab switching
+        const showTab = debounce((tabName) => {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }, 100);
+
+        // Optimize demo functionality
+        const runDemo = debounce(async () => {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'flex';
+            
+            try {
+                const mode = document.getElementById('demo-mode').value;
+                const input = document.getElementById('demo-input').value.trim();
+                const hashType = document.getElementById('hash-type').value;
+                const resultsDiv = document.getElementById('demo-results');
+                const terminal = document.getElementById('demo-terminal');
+                
+                // Input validation
+                if (!input) {
+                    alert('Please enter a password or hash');
+                    return;
+                }
+
+                // Sanitize input
+                const sanitizedInput = input.replace(/[<>]/g, '');
+                if (sanitizedInput !== input) {
+                    alert('Invalid characters detected. Please remove < and > characters.');
+                    return;
+                }
+
+                // Length validation
+                if (mode === 'analyze' && input.length > 128) {
+                    alert('Password is too long. Maximum length is 128 characters.');
+                    return;
+                }
+
+                // Hash format validation for crack mode
+                if (mode === 'crack') {
+                    const hashRegex = {
+                        'md5': /^[a-fA-F0-9]{32}$/,
+                        'sha1': /^[a-fA-F0-9]{40}$/,
+                        'sha256': /^[a-fA-F0-9]{64}$/
+                    };
+                    if (!hashRegex[hashType].test(input)) {
+                        alert(`Invalid ${hashType.toUpperCase()} hash format`);
+                        return;
+                    }
+                }
+                
+                terminal.style.display = 'block';
+                terminal.innerHTML = '<div class="terminal-line terminal-prompt">$ password_tool --' + mode + '</div>';
+                
+                if (mode === 'analyze') {
+                    const analysis = analyzePasswordStrength(input);
+                    
+                    resultsDiv.innerHTML = `
+                        <h3>Password Analysis Results</h3>
+                        <table class="hash-table">
+                            <tr>
+                                <th>Property</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr>
+                                <td>Length</td>
+                                <td>${input.length} characters</td>
+                            </tr>
+                            <tr>
+                                <td>Strength Score</td>
+                                <td>${analysis.score}/100</td>
+                            </tr>
+                            <tr>
+                                <td>Strength Rating</td>
+                                <td><span class="badge" style="background: ${analysis.color}22; color: ${analysis.color}">${analysis.strength}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Character Types</td>
+                                <td>
+                                    ${/[a-z]/.test(input) ? '<span class="badge">lowercase</span>' : ''}
+                                    ${/[A-Z]/.test(input) ? '<span class="badge">UPPERCASE</span>' : ''}
+                                    ${/[0-9]/.test(input) ? '<span class="badge">Numbers</span>' : ''}
+                                    ${/[^a-zA-Z0-9]/.test(input) ? '<span class="badge">Symbols</span>' : ''}
+                                </td>
+                            </tr>
+                        </table>
+                        ${analysis.feedback.length > 0 ? '<h4>Recommendations:</h4><ul>' + analysis.feedback.map(f => '<li>' + f + '</li>').join('') + '</ul>' : ''}
+                    `;
+                    
+                    terminal.innerHTML += `
+                        <div class="terminal-line terminal-info">[*] Analyzing password...</div>
+                        <div class="terminal-line terminal-success">[+] Analysis complete</div>
+                        <div class="terminal-line terminal-info">[*] Strength: ${analysis.strength} (${analysis.score}/100)</div>
+                    `;
+                    
+                } else if (mode === 'hash') {
+                    try {
+                        const hash = await hashPassword(input, hashType === 'sha1' ? 'sha-1' : hashType === 'sha256' ? 'sha-256' : 'md5');
+                        
+                        resultsDiv.innerHTML = `
+                            <h3>Generated Hash</h3>
+                            <table class="hash-table">
+                                <tr>
+                                    <th>Algorithm</th>
+                                    <th>Hash Value</th>
+                                </tr>
+                                <tr>
+                                    <td>${hashType.toUpperCase()}</td>
+                                    <td style="font-family: monospace; word-break: break-all;">${hash}</td>
+                                </tr>
+                            </table>
+                            <p style="margin-top: 10px; color: #888;">Note: In production, use bcrypt or Argon2 for password storage, not ${hashType.toUpperCase()}</p>
+                        `;
+                        
+                        terminal.innerHTML += `
+                            <div class="terminal-line terminal-info">[*] Hashing password with ${hashType}...</div>
+                            <div class="terminal-line terminal-success">[+] Hash generated: ${hash}</div>
+                        `;
+                        
+                    } catch (error) {
+                        terminal.innerHTML += `<div class="terminal-line terminal-error">[-] Error: ${error.message}</div>`;
+                        resultsDiv.innerHTML = `<div class="terminal-error">Error: ${error.message}</div>`;
+                    }
+                } else if (mode === 'crack') {
+                    // Simulated cracking demo
+                    resultsDiv.innerHTML = '<h3>Cracking Simulation</h3><div class="progress-bar"><div class="progress-fill" id="crack-progress" style="width: 0%"></div></div><p id="crack-status">Initializing...</p>';
+                    
+                    const knownHashes = {
+                        '5f4dcc3b5aa765d61d8327deb882cf99': 'password',
+                        '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8': 'password',
+                        'e10adc3949ba59abbe56e057f20f883e': '123456'
+                    };
+                    
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 10;
+                        document.getElementById('crack-progress').style.width = progress + '%';
+                        document.getElementById('crack-status').textContent = `Trying passwords... ${progress * 1000} attempts`;
+                        
+                        terminal.innerHTML += `<div class="terminal-line terminal-prompt">[*] Attempts: ${progress * 1000}</div>`;
+                        
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            
+                            if (knownHashes[input]) {
+                                document.getElementById('crack-status').innerHTML = `<span class="terminal-success">✓ Password found: ${knownHashes[input]}</span>`;
+                                terminal.innerHTML += `<div class="terminal-line terminal-success">[+] PASSWORD FOUND: ${knownHashes[input]}</div>`;
+                            } else {
+                                document.getElementById('crack-status').innerHTML = '<span class="terminal-error">✗ Password not found in wordlist</span>';
+                                terminal.innerHTML += '<div class="terminal-line terminal-error">[-] Password not found</div>';
+                            }
+                        }
+                    }, 200);
+                }
+            } catch (error) {
+                console.error('Demo error:', error);
+                const resultsDiv = document.getElementById('demo-results');
+                resultsDiv.innerHTML = `<div class="terminal-error">An unexpected error occurred. Please try again.</div>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }, 250);
+
+        // Add error boundary
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Error: ', msg, '\nURL: ', url, '\nLine: ', lineNo, '\nColumn: ', columnNo, '\nError object: ', error);
+            return false;
+        };
+
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const textArea = document.createElement('textarea');
+            textArea.value = codeElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // Update button text
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 2000);
+        }
+
+        // Demo functionality
+        async function hashPassword(password, algorithm) {
+            try {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password);
+                
+                const hashBuffer = await crypto.subtle.digest(algorithm.toUpperCase().replace('SHA', 'SHA-'), data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                return hashHex;
+            } catch (error) {
+                console.error('Hashing error:', error);
+                throw new Error('Failed to generate hash. Please try again.');
+            }
+        }
+
+        function analyzePasswordStrength(password) {
+            let score = 0;
+            let feedback = [];
+            
+            // Length
+            if (password.length >= 16) score += 30;
+            else if (password.length >= 12) score += 20;
+            else if (password.length >= 8) score += 10;
+            else feedback.push('Too short - use at least 12 characters');
+            
+            // Character types
+            if (/[a-z]/.test(password)) score += 10;
+            if (/[A-Z]/.test(password)) score += 10;
+            if (/[0-9]/.test(password)) score += 10;
+            if (/[^a-zA-Z0-9]/.test(password)) score += 20;
+            
+            // Common patterns
+            const commonPasswords = ['password', '123456', 'qwerty', 'letmein', 'admin'];
+            if (commonPasswords.includes(password.toLowerCase())) {
+                score = 0;
+                feedback.push('This is a commonly used password!');
+            }
+            
+            // Determine strength
+            let strength = 'Very Weak';
+            let color = '#ff6b6b';
+            if (score >= 80) { strength = 'Very Strong'; color = '#4ecdc4'; }
+            else if (score >= 60) { strength = 'Strong'; color = '#4ecdc4'; }
+            else if (score >= 40) { strength = 'Moderate'; color = '#f9ca24'; }
+            else if (score >= 20) { strength = 'Weak'; color = '#ff6b6b'; }
+            
+            return { score, strength, color, feedback };
+        }
+    </script>
+</body>
+</html> 
